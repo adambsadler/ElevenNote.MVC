@@ -25,6 +25,7 @@ namespace ElevenNote.WebMVC.Controllers
         // GET: Create
         public ActionResult Create()
         {
+            ViewBag.Categories = new SelectList(GetCategories(), "CategoryId", "Name");
             return View();
         }
 
@@ -33,7 +34,11 @@ namespace ElevenNote.WebMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(NoteCreate model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Categories = new SelectList(GetCategories(), "CategoryId", "Name", model.CategoryId);
+                return View(model);
+            }
 
             var service = CreateNoteService();
 
@@ -44,6 +49,7 @@ namespace ElevenNote.WebMVC.Controllers
             };
 
             ModelState.AddModelError("", "Note could not be created.");
+            ViewBag.Categories = new SelectList(GetCategories(), "CategoryId", "Name", model.CategoryId);
 
             return View(model);
         }
@@ -65,8 +71,10 @@ namespace ElevenNote.WebMVC.Controllers
                 {
                     NoteId = detail.NoteId,
                     Title = detail.Title,
-                    Content = detail.Content
+                    Content = detail.Content,
+                    CategoryId = detail.CategoryId
                 };
+            ViewBag.Categories = new SelectList(GetCategories(), "CategoryId", "Name", detail.CategoryId);
             return View(model);
         }
 
@@ -74,7 +82,11 @@ namespace ElevenNote.WebMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, NoteEdit model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Categories = new SelectList(GetCategories(), "CategoryId", "Name", model.CategoryId);
+                return View(model);
+            }
 
             if(model.NoteId != id)
             {
@@ -90,6 +102,7 @@ namespace ElevenNote.WebMVC.Controllers
             }
 
             ModelState.AddModelError("", "Your note could not be updated.");
+            ViewBag.Categories = new SelectList(GetCategories(), "CategoryId", "Name", model.CategoryId);
             return View(model);
         }
 
@@ -118,6 +131,15 @@ namespace ElevenNote.WebMVC.Controllers
             var userId = Guid.Parse(User.Identity.GetUserId());
             var service = new NoteService(userId);
             return service;
+        }
+
+        private List<CategoryListItem> GetCategories()
+        {
+            var userId = Guid.Parse(User.Identity.GetUserId());
+            var service = new CategoryService(userId);
+            var categories = service.GetCategories().OrderBy(c => c.Name).ToList();
+
+            return (List<CategoryListItem>)categories;
         }
     }
 }
