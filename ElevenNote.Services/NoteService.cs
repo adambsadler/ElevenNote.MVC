@@ -50,6 +50,7 @@ namespace ElevenNote.Services
                             {
                                 NoteId = e.NoteId,
                                 Title = e.Title,
+                                IsStarred = e.IsStarred,
                                 CategoryName = e.Category.Name,
                                 CreatedUtc = e.CreatedUtc
                             }
@@ -94,6 +95,7 @@ namespace ElevenNote.Services
                 entity.Content = model.Content;
                 entity.CategoryId = model.CategoryId;
                 entity.ModifiedUtc = DateTimeOffset.UtcNow;
+                entity.IsStarred = model.IsStarred;
 
                 return ctx.SaveChanges() == 1;
             }
